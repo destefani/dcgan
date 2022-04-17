@@ -16,6 +16,7 @@ import torchvision.utils as vutils
 from tensorboardX import SummaryWriter
 
 from training.networks import Generator, Discriminator
+from utils import weights_init
 
 
 parser = argparse.ArgumentParser()
@@ -42,19 +43,14 @@ parser.add_argument('--classes', default='bedroom', help='comma separated list o
 parser.add_argument('--grid_size', type=int, default=16, help='grid size')
 
 opt = parser.parse_args()
-print(vars(opt))
 
 writer = SummaryWriter(f'runs/{opt.outf}')
 writer.add_hparams(vars(opt), {})
 
-
-# with open('lox.txt', 'w') as f:
-#     f.write(json.dumps(vars(opt)))
-
 try:
     os.makedirs(opt.outf)
 except OSError:
-    passnz
+    pass
 
 cudnn.benchmark = True
 
@@ -118,63 +114,22 @@ ngf = int(opt.ngf)
 ndf = int(opt.ndf)
 
 
-# custom weights initialization called on netG and netD
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
-        torch.nn.init.normal_(m.weight, 0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
-        torch.nn.init.normal_(m.weight, 1.0, 0.02)
-        torch.nn.init.zeros_(m.bias)
-
-
 netG = Generator(
-    z_dim=opt.nz,
-    num_features=opt.ngf,
-    channel_dim=opt.nc,
-    ngpu=opt.ngpu).to(device)
+    z_dim=nz,
+    num_features=ngf,
+    channel_dim=nc,
+    ngpu=ngpu
+    ).to(device)
 
-netG.apply(weights_init)
-if opt.netG != '':
-    netG.load_state_dict(torch.load(opt.netG))
 print(netG)
 
 
-class Discriminator(nn.Module):
-    def __init__(self, ngpu):
-        super(Discriminator, self).__init__()
-        self.ngpu = ngpu
-        self.main = nn.Sequential(
-            # input is (nc) x 64 x 64
-            nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 32 x 32
-            nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 2),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*2) x 16 x 16
-            nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*4) x 8 x 8
-            nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*8) x 4 x 4
-            nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-            nn.Sigmoid()
-        )
+netD = Discriminator(
+    num_features=ndf,
+    channel_dim=nc,
+    ngpu=ngpu
+    ).to(device)
 
-    def forward(self, input):
-        if input.is_cuda and self.ngpu > 1:
-            output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
-        else:
-            output = self.main(input)
-
-        return output.view(-1, 1).squeeze(1)
-
-
-netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 if opt.netD != '':
     netD.load_state_dict(torch.load(opt.netD))
