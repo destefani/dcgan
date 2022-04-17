@@ -15,15 +15,15 @@ from training.training_loop import training_loop
 
 # Optional arguments
 @click.option('--gpus',         help='Number of GPUs to use', metavar='INT',                    type=click.IntRange(min=1), default=1)
-@click.option('--workers',      help='Number of workers to use', metavar='INT',                type=click.IntRange(min=1), default=2)
-@click.option('n_channels',      help='Number of channels', metavar='INT',                      type=click.IntRange(min=1), default=3)
+@click.option('--workers',      help='Number of workers to use', metavar='INT',                 type=click.IntRange(min=1), default=2)
+@click.option('n_channels',     help='Number of channels', metavar='INT',                       type=click.IntRange(min=1), default=3)
 
 # Hyperparameters
 @click.option('--lr',           help='Learning rate', metavar='FLOAT',                          type=click.FloatRange(min=0.0), default=0.0002)
 @click.option('--beta1',        help='Adam beta1', metavar='FLOAT',                             type=click.FloatRange(min=0.0, max=1.0), default=0.5)
-@click.option('--z_dim',        help='Latent space dimension', metavar='INT',                    type=click.IntRange(min=1), default=100)
-@click.option('--gen_features', help='Number of features in the generator', metavar='INT',       type=click.IntRange(min=1), default=64)
-@click.option('--disc_features',help='Number of features in the discriminator', metavar='INT',     type=click.IntRange(min=1), default=64)
+@click.option('--z_dim',        help='Latent space dimension', metavar='INT',                   type=click.IntRange(min=1), default=100)
+@click.option('--gen_features', help='Number of features in the generator', metavar='INT',      type=click.IntRange(min=1), default=64)
+@click.option('--disc_features',help='Number of features in the discriminator', metavar='INT',  type=click.IntRange(min=1), default=64)
 
 def main(**kwargs):
     opt = kwargs
