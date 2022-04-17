@@ -7,13 +7,11 @@ class Generator(nn.Module):
         z_dim,        # Input latent (Z) dimensionality
         channel_dim,                    
         num_features,
-        ngpu
     ):
         super().__init__()
         self.z_dim = z_dim
         self.channel_dim = channel_dim
         self.num_features = num_features
-        self.ngpu = ngpu
 
         self.main = nn.Sequential(
             # input is Z, going into a convolution
@@ -46,12 +44,10 @@ class Discriminator(nn.Module):
     def __init__(self,
         channel_dim,
         num_features,
-        ngpu
     ):
         super().__init__()
         self.channel_dim = channel_dim
         self.num_features = num_features
-        self.ngpu = ngpu
 
         self.main = nn.Sequential(
             # input is (nc) x 64 x 64
