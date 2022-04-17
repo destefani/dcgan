@@ -24,6 +24,7 @@ def weights_init(model):
 
 def training_loop(
     dataroot,
+    outdir,
     num_epochs,
     workers,
     batch_size,
@@ -100,7 +101,7 @@ def training_loop(
     # For each epoch
     for epoch in range(num_epochs):
         for i, data in enumerate(dataloader, 0):
-            # Update discriminator: maximize log(D(x)) + log(1 - D(G(z)))
+            # 1. Update discriminator: maximize log(D(x)) + log(1 - D(G(z)))
             # Train with all-real batch
             discriminator.zero_grad()
             real_cpu = data[0].to(device)
@@ -121,7 +122,7 @@ def training_loop(
             errD = errD_real + errD_fake
             optimizer_D.step()
 
-            # Update generator: maximize log(D(G(z)))
+            # 1. Update generator: maximize log(D(G(z)))
             generator.zero_grad()
             label.fill_(real_label)  # fake labels are real for generator cost
             output = discriminator(fake).view(-1)
@@ -147,6 +148,3 @@ def training_loop(
                 img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
             iters += 1
-
-
-    
